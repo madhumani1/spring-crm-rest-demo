@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.madhu.demo.entity.Customer;
+import com.madhu.demo.exception.CustomerNotFoundException;
 import com.madhu.demo.service.CustomerService;
 
 /**
@@ -36,6 +37,14 @@ public class CustomerRestController {
 	@GetMapping("/customers/{customerId}")
 	public Customer getCustomer(@PathVariable int customerId)	{
 		Customer theCustomer = customerService.getCustomer(customerId);
+		// if customer id is not found in database, it returns null 
+		// then Jackson will return empty body for null objects.
+		// NOW what if we need to give 404 status (or any valid HTTP status) for each bad cases?
+		// for this we need to add Exception classes - CustomerErrorResponse, 
+		// CustomerNotFoundException and CustomerRestExceptionHandler.
+		if (theCustomer == null) {
+			throw new CustomerNotFoundException("Customer id not found - " + customerId);
+		}
 		return theCustomer;
 	}
 }
